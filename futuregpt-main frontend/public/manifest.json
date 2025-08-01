@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "SecureDSA-Pro Hybrid",
+  "version": "1.0.0",
+  "description": "Advanced DSA problem solver with multi-model AI orchestration - Hybrid Web App + Extension",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://localhost:3000/*",
+    "http://localhost:11434/*",
+    "http://localhost:11435/*",
+    "http://localhost:11436/*",
+    "http://localhost:11437/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "SecureDSA-Pro"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*", "lib/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

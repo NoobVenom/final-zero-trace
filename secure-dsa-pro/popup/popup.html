@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureDSA-Pro</title>
+    <link rel="stylesheet" href="popup.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+</head>
+<body>
+    <div class="dsa-solver">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-section">
+                <h1>🔒 SecureDSA-Pro</h1>
+                <span class="zero-trace-badge">Zero-Trace Enabled</span>
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot" id="status-dot"></div>
+                <span id="status-text">Ready</span>
+            </div>
+        </header>
+
+        <!-- Input Section -->
+        <div class="input-section">
+            <div class="problem-input-container">
+                <label for="problem-input">DSA Problem:</label>
+                <textarea 
+                    id="problem-input" 
+                    placeholder="Paste your DSA problem here...
+Example: Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target."
+                    rows="6"
+                ></textarea>
+            </div>
+            
+            <div class="controls">
+                <div class="language-selector">
+                    <label for="language-select">Language:</label>
+                    <select id="language-select">
+                        <option value="python">Python</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="java">Java</option>
+                        <option value="cpp">C++</option>
+                    </select>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="solve-btn" class="primary-btn">
+                        <span class="btn-icon">🚀</span>
+                        Solve Problem
+                    </button>
+                    <button id="clear-btn" class="secondary-btn">
+                        <span class="btn-icon">🗑️</span>
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section" id="progress-section" style="display: none;">
+            <div class="progress-header">
+                <h3>Solving Problem...</h3>
+                <div class="progress-steps">
+                    <div class="step active" id="step-analysis">
+                        <span class="step-number">1</span>
+                        <span class="step-text">Analyzing</span>
+                    </div>
+                    <div class="step" id="step-solution">
+                        <span class="step-number">2</span>
+                        <span class="step-text">Solving</span>
+                    </div>
+                    <div class="step" id="step-testing">
+                        <span class="step-number">3</span>
+                        <span class="step-text">Testing</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="progress-details">
+                <div class="current-model">
+                    <span>Current Model:</span>
+                    <span id="current-model-name">GPT-4o Mini</span>
+                </div>
+                <div class="attempt-info">
+                    <span>Attempt:</span>
+                    <span id="attempt-number">1</span>
+                    <span>/</span>
+                    <span id="max-attempts">4</span>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="results-section" style="display: none;">
+            <div class="results-header">
+                <h3>Solution Results</h3>
+                <div class="result-status" id="result-status"></div>
+            </div>
+            
+            <div class="solution-tabs">
+                <button class="tab active" data-tab="code">Solution</button>
+                <button class="tab" data-tab="explanation">Explanation</button>
+                <button class="tab" data-tab="tests">Test Results</button>
+                <button class="tab" data-tab="complexity">Complexity</button>
+                <button class="tab" data-tab="history">History</button>
+            </div>
+            
+            <div class="tab-content">
+                <div class="tab-pane active" id="code-content">
+                    <div class="code-header">
+                        <span>Generated Code:</span>
+                        <button id="copy-code-btn" class="copy-btn">📋 Copy</button>
+                    </div>
+                    <div id="code-editor" class="code-editor"></div>
+                </div>
+                
+                <div class="tab-pane" id="explanation-content">
+                    <div class="explanation-content" id="explanation-text"></div>
+                </div>
+                
+                <div class="tab-pane" id="tests-content">
+                    <div class="test-results" id="test-results"></div>
+                </div>
+                
+                <div class="tab-pane" id="complexity-content">
+                    <div class="complexity-analysis" id="complexity-analysis"></div>
+                </div>
+                
+                <div class="tab-pane" id="history-content">
+                    <div class="history-header">
+                        <h4>Previous Solutions</h4>
+                        <button id="clear-history-btn" class="secondary-btn">Clear History</button>
+                    </div>
+                    <div class="history-list" id="history-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Failure History Section -->
+        <div class="failure-history" id="failure-history" style="display: none;">
+            <div class="failure-header">
+                <h3>Previous Attempts (Learning Mode)</h3>
+                <button id="toggle-failure-history" class="secondary-btn">Hide</button>
+            </div>
+            <div class="failure-list" id="failure-list"></div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="settings-section">
+            <button id="settings-toggle" class="settings-btn">⚙️ Settings</button>
+            <div class="settings-panel" id="settings-panel" style="display: none;">
+                <div class="setting-item">
+                    <label for="max-attempts-setting">Max Attempts:</label>
+                    <input type="number" id="max-attempts-setting" min="1" max="10" value="4">
+                </div>
+                <div class="setting-item">
+                    <label for="show-step-by-step">Show Step-by-Step:</label>
+                    <input type="checkbox" id="show-step-by-step" checked>
+                </div>
+                <div class="setting-item">
+                    <label for="auto-save">Auto-save Solutions:</label>
+                    <input type="checkbox" id="auto-save" checked>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html> 

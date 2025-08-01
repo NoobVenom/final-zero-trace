@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "SecureDSA-Pro",
+  "version": "1.0.0",
+  "description": "Zero-trace DSA problem solver with multi-model AI orchestration",
+  "permissions": [
+    "storage",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "http://localhost:*",
+    "http://127.0.0.1:*"
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "SecureDSA-Pro"
+  },
+  "side_panel": {
+    "default_path": "sidepanel/sidepanel.html"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; connect-src 'self' http://localhost:* http://127.0.0.1:* ws://127.0.0.1:*;"
+  },
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*", "lib/*", "ai-service.js", "test-runner.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+} 

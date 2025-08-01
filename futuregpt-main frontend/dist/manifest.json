@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "zeroTrace - Privacy-First AI",
+  "version": "1.0.0",
+  "description": "Your privacy-first AI companion. All data processed in-memory, leaving zero trace.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://localhost:3000/*",
+    "https://api.chatanywhere.tech/*",
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "zeroTrace AI"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
