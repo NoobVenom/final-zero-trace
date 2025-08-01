@@ -1,0 +1,140 @@
+version: '3.8'
+
+services:
+  # N8N Workflow Automation
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: hybrid-dsa-n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=secure123
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=UTC
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - hybrid-dsa-network
+
+  # MCP Server for Claude 3.5 (Primary Model)
+  mcp-claude-primary:
+    image: ollama/ollama:latest
+    container_name: hybrid-dsa-claude-primary
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    volumes:
+      - claude_primary_data:/root/.ollama
+    networks:
+      - hybrid-dsa-network
+    command: >
+      sh -c "
+        ollama pull claude3.5 &&
+        ollama serve
+      "
+
+  # MCP Server for Deepseek v3 (Secondary Model)
+  mcp-deepseek-secondary:
+    image: ollama/ollama:latest
+    container_name: hybrid-dsa-deepseek-secondary
+    restart: unless-stopped
+    ports:
+      - "11436:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    volumes:
+      - deepseek_secondary_data:/root/.ollama
+    networks:
+      - hybrid-dsa-network
+    command: >
+      sh -c "
+        ollama pull deepseek-coder &&
+        ollama serve
+      "
+
+  # MCP Server for GPT-4.1 (Retry Model 1)
+  mcp-gpt41-retry1:
+    image: ollama/ollama:latest
+    container_name: hybrid-dsa-gpt41-retry1
+    restart: unless-stopped
+    ports:
+      - "11435:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    volumes:
+      - gpt41_retry1_data:/root/.ollama
+    networks:
+      - hybrid-dsa-network
+    command: >
+      sh -c "
+        ollama pull gpt4.1 &&
+        ollama serve
+      "
+
+  # MCP Server for Grok4 (Retry Model 2)
+  mcp-grok4-retry2:
+    image: ollama/ollama:latest
+    container_name: hybrid-dsa-grok4-retry2
+    restart: unless-stopped
+    ports:
+      - "11437:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    volumes:
+      - grok4_retry2_data:/root/.ollama
+    networks:
+      - hybrid-dsa-network
+    command: >
+      sh -c "
+        ollama pull grok4 &&
+        ollama serve
+      "
+
+  # Health Check Service
+  health-check:
+    image: curlimages/curl:latest
+    container_name: hybrid-dsa-health-check
+    depends_on:
+      - n8n
+      - mcp-claude-primary
+      - mcp-deepseek-secondary
+      - mcp-gpt41-retry1
+      - mcp-grok4-retry2
+    networks:
+      - hybrid-dsa-network
+    command: >
+      sh -c "
+        echo 'Checking N8N...' &&
+        curl -f http://n8n:5678/healthz || exit 1 &&
+        echo 'Checking Claude 3.5 (Primary)...' &&
+        curl -f http://mcp-claude-primary:11434/api/tags || exit 1 &&
+        echo 'Checking Deepseek v3 (Secondary)...' &&
+        curl -f http://mcp-deepseek-secondary:11434/api/tags || exit 1 &&
+        echo 'Checking GPT-4.1 (Retry 1)...' &&
+        curl -f http://mcp-gpt41-retry1:11434/api/tags || exit 1 &&
+        echo 'Checking Grok4 (Retry 2)...' &&
+        curl -f http://mcp-grok4-retry2:11434/api/tags || exit 1 &&
+        echo 'All services are healthy!' &&
+        tail -f /dev/null
+      "
+
+networks:
+  hybrid-dsa-network:
+    driver: bridge
+
+volumes:
+  n8n_data:
+    driver: local
+  claude_primary_data:
+    driver: local
+  deepseek_secondary_data:
+    driver: local
+  gpt41_retry1_data:
+    driver: local
+  grok4_retry2_data:
+    driver: local 
